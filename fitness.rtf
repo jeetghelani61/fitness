@@ -1,0 +1,1067 @@
+{\rtf1\ansi\ansicpg1252\deff0\nouicompat\deflang1033{\fonttbl{\f0\fnil\fcharset0 Calibri;}{\f1\fnil Calibri;}}
+{\*\generator Riched20 10.0.19041}\viewkind4\uc1 
+\pard\sa200\sl276\slmult1\f0\fs22\lang9 1. Main App Structure & Models\par
+main.dart\par
+\par
+dart\par
+import 'package:flutter/material.dart';\par
+import 'screens/home_screen.dart';\par
+\par
+void main() \{\par
+  runApp(MyApp());\par
+\}\par
+\par
+class MyApp extends StatelessWidget \{\par
+  @override\par
+  Widget build(BuildContext context) \{\par
+    return MaterialApp(\par
+      title: 'FitTrack Pro',\par
+      theme: ThemeData(\par
+        primarySwatch: Colors.blue,\par
+        visualDensity: VisualDensity.adaptivePlatformDensity,\par
+      ),\par
+      home: HomeScreen(),\par
+      debugShowCheckedModeBanner: false,\par
+    );\par
+  \}\par
+\}\par
+models/exercise_model.dart\par
+\par
+dart\par
+class Exercise \{\par
+  final String id;\par
+  final String name;\par
+  final String type;\par
+  final String muscleGroup;\par
+  final String difficulty;\par
+  final String instructions;\par
+  final String imageUrl;\par
+  final int duration; // in seconds\par
+\par
+  Exercise(\{\par
+    required this.id,\par
+    required this.name,\par
+    required this.type,\par
+    required this.muscleGroup,\par
+    required this.difficulty,\par
+    required this.instructions,\par
+    required this.imageUrl,\par
+    required this.duration,\par
+  \});\par
+\}\par
+\par
+class Workout \{\par
+  final String id;\par
+  final String name;\par
+  final List<Exercise> exercises;\par
+  final int totalDuration;\par
+  final DateTime created;\par
+  int caloriesBurned;\par
+\par
+  Workout(\{\par
+    required this.id,\par
+    required this.name,\par
+    required this.exercises,\par
+    required this.totalDuration,\par
+    required this.created,\par
+    this.caloriesBurned = 0,\par
+  \});\par
+\}\par
+\par
+class FoodEntry \{\par
+  final String id;\par
+  final String name;\par
+  final int calories;\par
+  final DateTime timestamp;\par
+\par
+  FoodEntry(\{\par
+    required this.id,\par
+    required this.name,\par
+    required this.calories,\par
+    required this.timestamp,\par
+  \});\par
+\}\par
+2. Home Screen\par
+screens/home_screen.dart\par
+\par
+dart\par
+import 'package:flutter/material.dart';\par
+import 'workout_tracker_screen.dart';\par
+import 'calorie_tracker_screen.dart';\par
+import 'exercise_library_screen.dart';\par
+import 'progress_screen.dart';\par
+\par
+class HomeScreen extends StatelessWidget \{\par
+  final List<Map<String, dynamic>> features = [\par
+    \{\par
+      'title': 'Workout Tracker',\par
+      'icon': Icons.fitness_center,\par
+      'color': Colors.blue,\par
+      'screen': WorkoutTrackerScreen(),\par
+    \},\par
+    \{\par
+      'title': 'Calorie Tracker',\par
+      'icon': Icons.restaurant,\par
+      'color': Colors.green,\par
+      'screen': CalorieTrackerScreen(),\par
+    \},\par
+    \{\par
+      'title': 'Exercise Library',\par
+      'icon': Icons.video_library,\par
+      'color': Colors.orange,\par
+      'screen': ExerciseLibraryScreen(),\par
+    \},\par
+    \{\par
+      'title': 'Progress',\par
+      'icon': Icons.trending_up,\par
+      'color': Colors.purple,\par
+      'screen': ProgressScreen(),\par
+    \},\par
+  ];\par
+\par
+  @override\par
+  Widget build(BuildContext context) \{\par
+    return Scaffold(\par
+      appBar: AppBar(\par
+        title: Text('FitTrack Pro'),\par
+        backgroundColor: Colors.blue,\par
+        foregroundColor: Colors.white,\par
+        elevation: 0,\par
+      ),\par
+      body: Column(\par
+        crossAxisAlignment: CrossAxisAlignment.start,\par
+        children: [\par
+          // Header Section\par
+          Container(\par
+            width: double.infinity,\par
+            padding: EdgeInsets.all(20),\par
+            decoration: BoxDecoration(\par
+              color: Colors.blue,\par
+              borderRadius: BorderRadius.only(\par
+                bottomLeft: Radius.circular(20),\par
+                bottomRight: Radius.circular(20),\par
+              ),\par
+            ),\par
+            child: Column(\par
+              crossAxisAlignment: CrossAxisAlignment.start,\par
+              children: [\par
+                Text(\par
+                  'Welcome Back!',\par
+                  style: TextStyle(\par
+                    color: Colors.white,\par
+                    fontSize: 24,\par
+                    fontWeight: FontWeight.bold,\par
+                  ),\par
+                ),\par
+                SizedBox(height: 8),\par
+                Text(\par
+                  'Ready for your next workout?',\par
+                  style: TextStyle(\par
+                    color: Colors.white70,\par
+                    fontSize: 16,\par
+                  ),\par
+                ),\par
+              ],\par
+            ),\par
+          ),\par
+          \par
+          // Features Grid\par
+          Expanded(\par
+            child: Padding(\par
+              padding: EdgeInsets.all(16),\par
+              child: GridView.builder(\par
+                gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(\par
+                  crossAxisCount: 2,\par
+                  crossAxisSpacing: 16,\par
+                  mainAxisSpacing: 16,\par
+                  childAspectRatio: 1.2,\par
+                ),\par
+                itemCount: features.length,\par
+                itemBuilder: (context, index) \{\par
+                  final feature = features[index];\par
+                  return _buildFeatureCard(\par
+                    context,\par
+                    feature['title'],\par
+                    feature['icon'],\par
+                    feature['color'],\par
+                    feature['screen'],\par
+                  );\par
+                \},\par
+              ),\par
+            ),\par
+          ),\par
+        ],\par
+      ),\par
+    );\par
+  \}\par
+\par
+  Widget _buildFeatureCard(\par
+      BuildContext context, String title, IconData icon, Color color, Widget screen) \{\par
+    return Card(\par
+      elevation: 4,\par
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),\par
+      child: InkWell(\par
+        onTap: () \{\par
+          Navigator.push(\par
+            context,\par
+            MaterialPageRoute(builder: (context) => screen),\par
+          );\par
+        \},\par
+        borderRadius: BorderRadius.circular(12),\par
+        child: Container(\par
+          padding: EdgeInsets.all(16),\par
+          child: Column(\par
+            mainAxisAlignment: MainAxisAlignment.center,\par
+            children: [\par
+              Container(\par
+                padding: EdgeInsets.all(12),\par
+                decoration: BoxDecoration(\par
+                  color: color.withOpacity(0.1),\par
+                  shape: BoxShape.circle,\par
+                ),\par
+                child: Icon(icon, color: color, size: 30),\par
+              ),\par
+              SizedBox(height: 12),\par
+              Text(\par
+                title,\par
+                style: TextStyle(\par
+                  fontSize: 16,\par
+                  fontWeight: FontWeight.bold,\par
+                ),\par
+                textAlign: TextAlign.center,\par
+              ),\par
+            ],\par
+          ),\par
+        ),\par
+      ),\par
+    );\par
+  \}\par
+\}\par
+3. Workout Tracker Screen\par
+screens/workout_tracker_screen.dart\par
+\par
+dart\par
+import 'package:flutter/material.dart';\par
+import '../models/exercise_model.dart';\par
+\par
+class WorkoutTrackerScreen extends StatefulWidget \{\par
+  @override\par
+  _WorkoutTrackerScreenState createState() => _WorkoutTrackerScreenState();\par
+\}\par
+\par
+class _WorkoutTrackerScreenState extends State<WorkoutTrackerScreen> \{\par
+  List<Workout> workouts = [];\par
+  List<Exercise> availableExercises = [\par
+    Exercise(\par
+      id: '1',\par
+      name: 'Push-ups',\par
+      type: 'Strength',\par
+      muscleGroup: 'Chest',\par
+      difficulty: 'Beginner',\par
+      instructions: 'Place hands shoulder-width apart and lower your body until chest nearly touches floor.',\par
+      imageUrl: 'assets/pushups.jpg',\par
+      duration: 180,\par
+    ),\par
+    Exercise(\par
+      id: '2',\par
+      name: 'Squats',\par
+      type: 'Strength',\par
+      muscleGroup: 'Legs',\par
+      difficulty: 'Beginner',\par
+      instructions: 'Stand with feet shoulder-width apart, lower hips back and down.',\par
+      imageUrl: 'assets/squats.jpg',\par
+      duration: 120,\par
+    ),\par
+    Exercise(\par
+      id: '3',\par
+      name: 'Plank',\par
+      type: 'Core',\par
+      muscleGroup: 'Abs',\par
+      difficulty: 'Beginner',\par
+      instructions: 'Hold your body in a straight line supported on forearms and toes.',\par
+      imageUrl: 'assets/plank.jpg',\par
+      duration: 60,\par
+    ),\par
+  ];\par
+\par
+  TextEditingController workoutNameController = TextEditingController();\par
+\par
+  @override\par
+  Widget build(BuildContext context) \{\par
+    return Scaffold(\par
+      appBar: AppBar(\par
+        title: Text('Workout Tracker'),\par
+        actions: [\par
+          IconButton(\par
+            icon: Icon(Icons.add),\par
+            onPressed: _showCreateWorkoutDialog,\par
+          ),\par
+        ],\par
+      ),\par
+      body: workouts.isEmpty\par
+          ? Center(\par
+              child: Column(\par
+                mainAxisAlignment: MainAxisAlignment.center,\par
+                children: [\par
+                  Icon(Icons.fitness_center, size: 64, color: Colors.grey),\par
+                  SizedBox(height: 16),\par
+                  Text(\par
+                    'No workouts yet',\par
+                    style: TextStyle(fontSize: 18, color: Colors.grey),\par
+                  ),\par
+                  SizedBox(height: 8),\par
+                  Text(\par
+                    'Tap + to create your first workout',\par
+                    style: TextStyle(color: Colors.grey),\par
+                  ),\par
+                ],\par
+              ),\par
+            )\par
+          : ListView.builder(\par
+              itemCount: workouts.length,\par
+              itemBuilder: (context, index) \{\par
+                final workout = workouts[index];\par
+                return Card(\par
+                  margin: EdgeInsets.symmetric(horizontal: 16, vertical: 8),\par
+                  child: ListTile(\par
+                    leading: CircleAvatar(\par
+                      backgroundColor: Colors.blue.shade100,\par
+                      child: Icon(Icons.fitness_center, color: Colors.blue),\par
+                    ),\par
+                    title: Text(workout.name),\par
+                    subtitle: Text(\par
+                        '$\{workout.exercises.length\} exercises \f1\bullet  $\{workout.totalDuration ~/ 60\} min'),\par
+                    trailing: Text('$\{workout.caloriesBurned\} cal'),\par
+                    onTap: () \{\par
+                      _showWorkoutDetails(workout);\par
+                    \},\par
+                  ),\par
+                );\par
+              \},\par
+            ),\par
+    );\par
+  \}\par
+\par
+  void _showCreateWorkoutDialog() \{\par
+    showDialog(\par
+      context: context,\par
+      builder: (context) => AlertDialog(\par
+        title: Text('Create New Workout'),\par
+        content: Column(\par
+          mainAxisSize: MainAxisSize.min,\par
+          children: [\par
+            TextField(\par
+              controller: workoutNameController,\par
+              decoration: InputDecoration(\par
+                labelText: 'Workout Name',\par
+                border: OutlineInputBorder(),\par
+              ),\par
+            ),\par
+            SizedBox(height: 16),\par
+            Text('Select Exercises:'),\par
+            Expanded(\par
+              child: Container(\par
+                height: 200,\par
+                child: ListView.builder(\par
+                  itemCount: availableExercises.length,\par
+                  itemBuilder: (context, index) \{\par
+                    final exercise = availableExercises[index];\par
+                    return CheckboxListTile(\par
+                      title: Text(exercise.name),\par
+                      subtitle: Text('$\{exercise.duration\}s \bullet  $\{exercise.muscleGroup\}'),\par
+                      value: false,\par
+                      onChanged: (value) \{\par
+                        // Handle exercise selection\par
+                      \},\par
+                    );\par
+                  \},\par
+                ),\par
+              ),\par
+            ),\par
+          ],\par
+        ),\par
+        actions: [\par
+          TextButton(\par
+            onPressed: () => Navigator.pop(context),\par
+            child: Text('Cancel'),\par
+          ),\par
+          ElevatedButton(\par
+            onPressed: () \{\par
+              _createWorkout();\par
+              Navigator.pop(context);\par
+            \},\par
+            child: Text('Create'),\par
+          ),\par
+        ],\par
+      ),\par
+    );\par
+  \}\par
+\par
+  void _createWorkout() \{\par
+    if (workoutNameController.text.isNotEmpty) \{\par
+      final newWorkout = Workout(\par
+        id: DateTime.now().millisecondsSinceEpoch.toString(),\par
+        name: workoutNameController.text,\par
+        exercises: availableExercises.sublist(0, 3), // Sample exercises\par
+        totalDuration: availableExercises.sublist(0, 3).fold(\par
+            0, (total, exercise) => total + exercise.duration),\par
+        created: DateTime.now(),\par
+        caloriesBurned: 150,\par
+      );\par
+\par
+      setState(() \{\par
+        workouts.add(newWorkout);\par
+      \});\par
+      workoutNameController.clear();\par
+    \}\par
+  \}\par
+\par
+  void _showWorkoutDetails(Workout workout) \{\par
+    showModalBottomSheet(\par
+      context: context,\par
+      builder: (context) => Container(\par
+        padding: EdgeInsets.all(16),\par
+        child: Column(\par
+          crossAxisAlignment: CrossAxisAlignment.start,\par
+          mainAxisSize: MainAxisSize.min,\par
+          children: [\par
+            Text(\par
+              workout.name,\par
+              style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),\par
+            ),\par
+            SizedBox(height: 16),\par
+            Text('Exercises:'),\par
+            ...workout.exercises.map((exercise) => ListTile(\par
+                  leading: Icon(Icons.play_arrow),\par
+                  title: Text(exercise.name),\par
+                  subtitle: Text('$\{exercise.duration\}s'),\par
+                )),\par
+            SizedBox(height: 16),\par
+            Row(\par
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,\par
+              children: [\par
+                Text('Total Duration: $\{workout.totalDuration ~/ 60\} min'),\par
+                Text('Calories: $\{workout.caloriesBurned\} cal'),\par
+              ],\par
+            ),\par
+          ],\par
+        ),\par
+      ),\par
+    );\par
+  \}\par
+\}\par
+4. Calorie Tracker Screen\par
+screens/calorie_tracker_screen.dart\par
+\par
+dart\par
+import 'package:flutter/material.dart';\par
+import '../models/exercise_model.dart';\par
+\par
+class CalorieTrackerScreen extends StatefulWidget \{\par
+  @override\par
+  _CalorieTrackerScreenState createState() => _CalorieTrackerScreenState();\par
+\}\par
+\par
+class _CalorieTrackerScreenState extends State<CalorieTrackerScreen> \{\par
+  int dailyCalorieLimit = 2000;\par
+  List<FoodEntry> foodEntries = [];\par
+  TextEditingController foodNameController = TextEditingController();\par
+  TextEditingController calorieController = TextEditingController();\par
+\par
+  int get totalCaloriesConsumed \{\par
+    return foodEntries.fold(0, (total, entry) => total + entry.calories);\par
+  \}\par
+\par
+  int get remainingCalories \{\par
+    return dailyCalorieLimit - totalCaloriesConsumed;\par
+  \}\par
+\par
+  @override\par
+  Widget build(BuildContext context) \{\par
+    return Scaffold(\par
+      appBar: AppBar(\par
+        title: Text('Calorie Tracker'),\par
+        actions: [\par
+          IconButton(\par
+            icon: Icon(Icons.settings),\par
+            onPressed: _showCalorieSettings,\par
+          ),\par
+        ],\par
+      ),\par
+      body: Column(\par
+        children: [\par
+          // Calorie Summary Card\par
+          Card(\par
+            margin: EdgeInsets.all(16),\par
+            child: Padding(\par
+              padding: EdgeInsets.all(16),\par
+              child: Column(\par
+                children: [\par
+                  Text(\par
+                    'Daily Calorie Summary',\par
+                    style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),\par
+                  ),\par
+                  SizedBox(height: 16),\par
+                  Row(\par
+                    mainAxisAlignment: MainAxisAlignment.spaceAround,\par
+                    children: [\par
+                      _buildCalorieInfo('Limit', dailyCalorieLimit.toString()),\par
+                      _buildCalorieInfo('Consumed', totalCaloriesConsumed.toString()),\par
+                      _buildCalorieInfo('Remaining', remainingCalories.toString(),\par
+                          color: remainingCalories >= 0 ? Colors.green : Colors.red),\par
+                    ],\par
+                  ),\par
+                  SizedBox(height: 16),\par
+                  LinearProgressIndicator(\par
+                    value: totalCaloriesConsumed / dailyCalorieLimit,\par
+                    backgroundColor: Colors.grey[200],\par
+                    valueColor: AlwaysStoppedAnimation<Color>(\par
+                      totalCaloriesConsumed <= dailyCalorieLimit\par
+                          ? Colors.green\par
+                          : Colors.red,\par
+                    ),\par
+                  ),\par
+                ],\par
+              ),\par
+            ),\par
+          ),\par
+\par
+          // Add Food Entry\par
+          Padding(\par
+            padding: EdgeInsets.symmetric(horizontal: 16),\par
+            child: Row(\par
+              children: [\par
+                Expanded(\par
+                  flex: 2,\par
+                  child: TextField(\par
+                    controller: foodNameController,\par
+                    decoration: InputDecoration(\par
+                      labelText: 'Food Name',\par
+                      border: OutlineInputBorder(),\par
+                    ),\par
+                  ),\par
+                ),\par
+                SizedBox(width: 8),\par
+                Expanded(\par
+                  flex: 1,\par
+                  child: TextField(\par
+                    controller: calorieController,\par
+                    decoration: InputDecoration(\par
+                      labelText: 'Calories',\par
+                      border: OutlineInputBorder(),\par
+                    ),\par
+                    keyboardType: TextInputType.number,\par
+                  ),\par
+                ),\par
+                SizedBox(width: 8),\par
+                IconButton(\par
+                  icon: Icon(Icons.add_circle, color: Colors.green),\par
+                  onPressed: _addFoodEntry,\par
+                ),\par
+              ],\par
+            ),\par
+          ),\par
+\par
+          // Food Entries List\par
+          Expanded(\par
+            child: foodEntries.isEmpty\par
+                ? Center(\par
+                    child: Column(\par
+                      mainAxisAlignment: MainAxisAlignment.center,\par
+                      children: [\par
+                        Icon(Icons.restaurant, size: 64, color: Colors.grey),\par
+                        SizedBox(height: 16),\par
+                        Text(\par
+                          'No food entries yet',\par
+                          style: TextStyle(fontSize: 18, color: Colors.grey),\par
+                        ),\par
+                      ],\par
+                    ),\par
+                  )\par
+                : ListView.builder(\par
+                    itemCount: foodEntries.length,\par
+                    itemBuilder: (context, index) \{\par
+                      final entry = foodEntries[index];\par
+                      return Dismissible(\par
+                        key: Key(entry.id),\par
+                        background: Container(color: Colors.red),\par
+                        onDismissed: (direction) \{\par
+                          setState(() \{\par
+                            foodEntries.removeAt(index);\par
+                          \});\par
+                        \},\par
+                        child: Card(\par
+                          margin: EdgeInsets.symmetric(horizontal: 16, vertical: 4),\par
+                          child: ListTile(\par
+                            leading: CircleAvatar(\par
+                              backgroundColor: Colors.green.shade100,\par
+                              child: Icon(Icons.restaurant, color: Colors.green),\par
+                            ),\par
+                            title: Text(entry.name),\par
+                            subtitle: Text('Added: $\{_formatTime(entry.timestamp)\}'),\par
+                            trailing: Text(\par
+                              '$\{entry.calories\} cal',\par
+                              style: TextStyle(\par
+                                fontWeight: FontWeight.bold,\par
+                                color: Colors.red,\par
+                              ),\par
+                            ),\par
+                          ),\par
+                        ),\par
+                      );\par
+                    \},\par
+                  ),\par
+          ),\par
+        ],\par
+      ),\par
+    );\par
+  \}\par
+\par
+  Widget _buildCalorieInfo(String label, String value, \{Color? color\}) \{\par
+    return Column(\par
+      children: [\par
+        Text(\par
+          label,\par
+          style: TextStyle(color: Colors.grey),\par
+        ),\par
+        SizedBox(height: 4),\par
+        Text(\par
+          value,\par
+          style: TextStyle(\par
+            fontSize: 18,\par
+            fontWeight: FontWeight.bold,\par
+            color: color ?? Colors.blue,\par
+          ),\par
+        ),\par
+      ],\par
+    );\par
+  \}\par
+\par
+  void _addFoodEntry() \{\par
+    if (foodNameController.text.isNotEmpty && calorieController.text.isNotEmpty) \{\par
+      final newEntry = FoodEntry(\par
+        id: DateTime.now().millisecondsSinceEpoch.toString(),\par
+        name: foodNameController.text,\par
+        calories: int.parse(calorieController.text),\par
+        timestamp: DateTime.now(),\par
+      );\par
+\par
+      setState(() \{\par
+        foodEntries.add(newEntry);\par
+      \});\par
+\par
+      foodNameController.clear();\par
+      calorieController.clear();\par
+    \}\par
+  \}\par
+\par
+  void _showCalorieSettings() \{\par
+    showDialog(\par
+      context: context,\par
+      builder: (context) => AlertDialog(\par
+        title: Text('Daily Calorie Limit'),\par
+        content: TextField(\par
+          keyboardType: TextInputType.number,\par
+          decoration: InputDecoration(\par
+            labelText: 'Calories',\par
+            border: OutlineInputBorder(),\par
+          ),\par
+          onChanged: (value) \{\par
+            if (value.isNotEmpty) \{\par
+              setState(() \{\par
+                dailyCalorieLimit = int.parse(value);\par
+              \});\par
+            \}\par
+          \},\par
+        ),\par
+        actions: [\par
+          TextButton(\par
+            onPressed: () => Navigator.pop(context),\par
+            child: Text('Cancel'),\par
+          ),\par
+          ElevatedButton(\par
+            onPressed: () => Navigator.pop(context),\par
+            child: Text('Save'),\par
+          ),\par
+        ],\par
+      ),\par
+    );\par
+  \}\par
+\par
+  String _formatTime(DateTime timestamp) \{\par
+    return '$\{timestamp.hour\}:$\{timestamp.minute.toString().padLeft(2, '0')\}';\par
+  \}\par
+\}\par
+5. Exercise Library Screen\par
+screens/exercise_library_screen.dart\par
+\par
+dart\par
+import 'package:flutter/material.dart';\par
+import '../models/exercise_model.dart';\par
+\par
+class ExerciseLibraryScreen extends StatefulWidget \{\par
+  @override\par
+  _ExerciseLibraryScreenState createState() => _ExerciseLibraryScreenState();\par
+\}\par
+\par
+class _ExerciseLibraryScreenState extends State<ExerciseLibraryScreen> \{\par
+  List<Exercise> exercises = [\par
+    Exercise(\par
+      id: '1',\par
+      name: 'Push-ups',\par
+      type: 'Strength',\par
+      muscleGroup: 'Chest',\par
+      difficulty: 'Beginner',\par
+      instructions: '1. Place your hands shoulder-width apart\\n2. Keep your body in a straight line\\n3. Lower your body until your chest nearly touches the floor\\n4. Push back up to the starting position',\par
+      imageUrl: 'assets/pushups.jpg',\par
+      duration: 180,\par
+    ),\par
+    Exercise(\par
+      id: '2',\par
+      name: 'Squats',\par
+      type: 'Strength',\par
+      muscleGroup: 'Legs',\par
+      difficulty: 'Beginner',\par
+      instructions: '1. Stand with feet shoulder-width apart\\n2. Lower your hips back and down\\n3. Keep your chest up and back straight\\n4. Go as low as you can comfortably\\n5. Push through your heels to return to start',\par
+      imageUrl: 'assets/squats.jpg',\par
+      duration: 120,\par
+    ),\par
+    Exercise(\par
+      id: '3',\par
+      name: 'Plank',\par
+      type: 'Core',\par
+      muscleGroup: 'Abs',\par
+      difficulty: 'Beginner',\par
+      instructions: '1. Place forearms on the ground\\n2. Keep your body in a straight line\\n3. Engage your core muscles\\n4. Hold for the desired time',\par
+      imageUrl: 'assets/plank.jpg',\par
+      duration: 60,\par
+    ),\par
+  ];\par
+\par
+  String selectedFilter = 'All';\par
+\par
+  @override\par
+  Widget build(BuildContext context) \{\par
+    return Scaffold(\par
+      appBar: AppBar(\par
+        title: Text('Exercise Library'),\par
+      ),\par
+      body: Column(\par
+        children: [\par
+          // Filter Chips\par
+          Container(\par
+            height: 60,\par
+            child: ListView(\par
+              scrollDirection: Axis.horizontal,\par
+              padding: EdgeInsets.symmetric(horizontal: 16),\par
+              children: [\par
+                'All',\par
+                'Chest',\par
+                'Legs',\par
+                'Abs',\par
+                'Arms',\par
+                'Back',\par
+              ].map((filter) \{\par
+                return Padding(\par
+                  padding: EdgeInsets.only(right: 8),\par
+                  child: FilterChip(\par
+                    label: Text(filter),\par
+                    selected: selectedFilter == filter,\par
+                    onSelected: (selected) \{\par
+                      setState(() \{\par
+                        selectedFilter = filter;\par
+                      \});\par
+                    \},\par
+                  ),\par
+                );\par
+              \}).toList(),\par
+            ),\par
+          ),\par
+          \par
+          // Exercises List\par
+          Expanded(\par
+            child: ListView.builder(\par
+              itemCount: exercises.length,\par
+              itemBuilder: (context, index) \{\par
+                final exercise = exercises[index];\par
+                if (selectedFilter != 'All' && exercise.muscleGroup != selectedFilter) \{\par
+                  return SizedBox.shrink();\par
+                \}\par
+                return Card(\par
+                  margin: EdgeInsets.symmetric(horizontal: 16, vertical: 8),\par
+                  child: ListTile(\par
+                    leading: CircleAvatar(\par
+                      backgroundColor: _getMuscleGroupColor(exercise.muscleGroup),\par
+                      child: Text(\par
+                        exercise.muscleGroup[0],\par
+                        style: TextStyle(color: Colors.white),\par
+                      ),\par
+                    ),\par
+                    title: Text(exercise.name),\par
+                    subtitle: Text('$\{exercise.type\} \bullet  $\{exercise.difficulty\}'),\par
+                    trailing: Icon(Icons.arrow_forward_ios, size: 16),\par
+                    onTap: () \{\par
+                      _showExerciseDetails(exercise);\par
+                    \},\par
+                  ),\par
+                );\par
+              \},\par
+            ),\par
+          ),\par
+        ],\par
+      ),\par
+    );\par
+  \}\par
+\par
+  void _showExerciseDetails(Exercise exercise) \{\par
+    showModalBottomSheet(\par
+      context: context,\par
+      isScrollControlled: true,\par
+      builder: (context) => Container(\par
+        padding: EdgeInsets.all(16),\par
+        child: Column(\par
+          crossAxisAlignment: CrossAxisAlignment.start,\par
+          mainAxisSize: MainAxisSize.min,\par
+          children: [\par
+            Row(\par
+              children: [\par
+                CircleAvatar(\par
+                  backgroundColor: _getMuscleGroupColor(exercise.muscleGroup),\par
+                  child: Text(\par
+                    exercise.muscleGroup[0],\par
+                    style: TextStyle(color: Colors.white),\par
+                  ),\par
+                ),\par
+                SizedBox(width: 16),\par
+                Expanded(\par
+                  child: Column(\par
+                    crossAxisAlignment: CrossAxisAlignment.start,\par
+                    children: [\par
+                      Text(\par
+                        exercise.name,\par
+                        style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),\par
+                      ),\par
+                      Text('$\{exercise.type\} \bullet  $\{exercise.difficulty\}'),\par
+                    ],\par
+                  ),\par
+                ),\par
+              ],\par
+            ),\par
+            SizedBox(height: 16),\par
+            Text(\par
+              'Instructions:',\par
+              style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),\par
+            ),\par
+            SizedBox(height: 8),\par
+            Text(exercise.instructions),\par
+            SizedBox(height: 16),\par
+            Row(\par
+              children: [\par
+                Icon(Icons.timer, size: 16),\par
+                SizedBox(width: 4),\par
+                Text('Duration: $\{exercise.duration\} seconds'),\par
+              ],\par
+            ),\par
+            SizedBox(height: 16),\par
+            SizedBox(\par
+              width: double.infinity,\par
+              child: ElevatedButton(\par
+                onPressed: () \{\par
+                  // Start exercise timer\par
+                \},\par
+                child: Text('Start Exercise'),\par
+              ),\par
+            ),\par
+          ],\par
+        ),\par
+      ),\par
+    );\par
+  \}\par
+\par
+  Color _getMuscleGroupColor(String muscleGroup) \{\par
+    switch (muscleGroup.toLowerCase()) \{\par
+      case 'chest':\par
+        return Colors.red;\par
+      case 'legs':\par
+        return Colors.green;\par
+      case 'abs':\par
+        return Colors.blue;\par
+      case 'arms':\par
+        return Colors.orange;\par
+      case 'back':\par
+        return Colors.purple;\par
+      default:\par
+        return Colors.grey;\par
+    \}\par
+  \}\par
+\}\par
+6. Progress Screen\par
+screens/progress_screen.dart\par
+\par
+dart\par
+import 'package:flutter/material.dart';\par
+import 'package:syncfusion_flutter_charts/charts.dart';\par
+\par
+class ProgressScreen extends StatefulWidget \{\par
+  @override\par
+  _ProgressScreenState createState() => _ProgressScreenState();\par
+\}\par
+\par
+class _ProgressScreenState extends State<ProgressScreen> \{\par
+  List<WorkoutData> weeklyData = [\par
+    WorkoutData('Mon', 3, 450),\par
+    WorkoutData('Tue', 2, 300),\par
+    WorkoutData('Wed', 4, 600),\par
+    WorkoutData('Thu', 1, 150),\par
+    WorkoutData('Fri', 3, 450),\par
+    WorkoutData('Sat', 2, 300),\par
+    WorkoutData('Sun', 0, 0),\par
+  ];\par
+\par
+  @override\par
+  Widget build(BuildContext context) \{\par
+    return Scaffold(\par
+      appBar: AppBar(\par
+        title: Text('Progress Tracking'),\par
+      ),\par
+      body: SingleChildScrollView(\par
+        padding: EdgeInsets.all(16),\par
+        child: Column(\par
+          crossAxisAlignment: CrossAxisAlignment.start,\par
+          children: [\par
+            // Weekly Summary Card\par
+            Card(\par
+              child: Padding(\par
+                padding: EdgeInsets.all(16),\par
+                child: Column(\par
+                  crossAxisAlignment: CrossAxisAlignment.start,\par
+                  children: [\par
+                    Text(\par
+                      'This Week',\par
+                      style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),\par
+                    ),\par
+                    SizedBox(height: 16),\par
+                    Row(\par
+                      mainAxisAlignment: MainAxisAlignment.spaceAround,\par
+                      children: [\par
+                        _buildStatCard('Workouts', '12'),\par
+                        _buildStatCard('Total Time', '8h 30m'),\par
+                        _buildStatCard('Calories', '3,450'),\par
+                      ],\par
+                    ),\par
+                  ],\par
+                ),\par
+              ),\par
+            ),\par
+            \par
+            SizedBox(height: 16),\par
+            \par
+            // Workouts Chart\par
+            Card(\par
+              child: Padding(\par
+                padding: EdgeInsets.all(16),\par
+                child: Column(\par
+                  crossAxisAlignment: CrossAxisAlignment.start,\par
+                  children: [\par
+                    Text(\par
+                      'Weekly Workouts',\par
+                      style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),\par
+                    ),\par
+                    SizedBox(height: 16),\par
+                    Container(\par
+                      height: 200,\par
+                      child: SfCartesianChart(\par
+                        primaryXAxis: CategoryAxis(),\par
+                        series: <CartesianSeries>[\par
+                          ColumnSeries<WorkoutData, String>(\par
+                            dataSource: weeklyData,\par
+                            xValueMapper: (WorkoutData data, _) => data.day,\par
+                            yValueMapper: (WorkoutData data, _) => data.workouts,\par
+                            color: Colors.blue,\par
+                          ),\par
+                        ],\par
+                      ),\par
+                    ),\par
+                  ],\par
+                ),\par
+              ),\par
+            ),\par
+            \par
+            SizedBox(height: 16),\par
+            \par
+            // Calories Chart\par
+            Card(\par
+              child: Padding(\par
+                padding: EdgeInsets.all(16),\par
+                child: Column(\par
+                  crossAxisAlignment: CrossAxisAlignment.start,\par
+                  children: [\par
+                    Text(\par
+                      'Calories Burned',\par
+                      style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),\par
+                    ),\par
+                    SizedBox(height: 16),\par
+                    Container(\par
+                      height: 200,\par
+                      child: SfCartesianChart(\par
+                        primaryXAxis: CategoryAxis(),\par
+                        series: <CartesianSeries>[\par
+                          LineSeries<WorkoutData, String>(\par
+                            dataSource: weeklyData,\par
+                            xValueMapper: (WorkoutData data, _) => data.day,\par
+                            yValueMapper: (WorkoutData data, _) => data.calories,\par
+                            color: Colors.green,\par
+                            markerSettings: MarkerSettings(isVisible: true),\par
+                          ),\par
+                        ],\par
+                      ),\par
+                    ),\par
+                  ],\par
+                ),\par
+              ),\par
+            ),\par
+          ],\par
+        ),\par
+      ),\par
+    );\par
+  \}\par
+\par
+  Widget _buildStatCard(String title, String value) \{\par
+    return Column(\par
+      children: [\par
+        Text(\par
+          title,\par
+          style: TextStyle(color: Colors.grey, fontSize: 12),\par
+        ),\par
+        SizedBox(height: 4),\par
+        Text(\par
+          value,\par
+          style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),\par
+        ),\par
+      ],\par
+    );\par
+  \}\par
+\}\par
+\par
+class WorkoutData \{\par
+  final String day;\par
+  final int workouts;\par
+  final int calories;\par
+\par
+  WorkoutData(this.day, this.workouts, this.calories);\par
+\}\par
+7. Pubspec.yaml Dependencies\par
+Add these dependencies to your pubspec.yaml:\par
+\par
+yaml\par
+dependencies:\par
+  flutter:\par
+    sdk: flutter\par
+  syncfusion_flutter_charts: ^20.4.48\par
+\par
+dev_dependencies:\par
+  flutter_test:\par
+    sdk: flutter\par
+  flutter_lints: ^2.0.0\f0\par
+}
+ 
